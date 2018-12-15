@@ -1,5 +1,7 @@
 package com.example.demo.service;
 
+import java.util.List;
+
 import com.example.demo.model.User;
 
 /**
@@ -48,5 +50,7 @@ public interface UserService {
    * @param  user  DOCUMENT ME!
    */
   void save(User user);
+
+	List<User> findAll();
 
 } // end interface UserService

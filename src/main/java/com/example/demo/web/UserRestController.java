@@ -1,10 +1,12 @@
 package com.example.demo.web;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.websocket.server.PathParam;
 
 import org.apache.tomcat.util.codec.binary.Base64;
 
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.User;
@@ -143,10 +146,10 @@ public class UserRestController {
 		logger.info("id : " + id);
 		User user = null;
 		try {
-		user = userService.findById(id);
-		if (user != null)
-			user.setPassword(decrypt(user.getPassword()));
-		}catch (NoSuchElementException e) {
+			user = userService.findById(id);
+			if (user != null)
+				user.setPassword(decrypt(user.getPassword()));
+		} catch (NoSuchElementException e) {
 			// TODO: handle exception
 		}
 		return user;
@@ -191,4 +194,29 @@ public class UserRestController {
 		return user;
 	}
 
+	@RequestMapping(value = "/users", method = RequestMethod.GET)
+	public List<User> getUsers() {
+		// model.addAttribute("userForm", new User());
+		logger.info("id : ");
+
+		List<User> user = userService.findAll();
+
+		return user;
+	}
+
+	@RequestMapping(value = "/users/search", method = RequestMethod.GET)
+	public User searchUsers(@RequestParam("q") String query, @RequestParam("v") String value) {
+		// model.addAttribute("userForm", new User());
+		logger.info("query : " + query);
+		logger.info("value : " + value);
+		User user = null;
+		try {
+			// user = userService.findById(id);
+			if (user != null)
+				user.setPassword(decrypt(user.getPassword()));
+		} catch (NoSuchElementException e) {
+			// TODO: handle exception
+		}
+		return user;
+	}
 } // end class UserRestController
