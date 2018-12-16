@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.example.demo.model.User;
@@ -16,42 +17,56 @@ import com.example.demo.web.UserRestController;
 @SpringBootTest
 public class SampleApplicationTests {
 
-	
-	@Autowired UserRestController userRestController;
+	@Autowired
+	UserRestController userRestController;
 
-	  //~ Methods ----------------------------------------------------------------------------------------------------------
+	// ~ Methods
+	// ----------------------------------------------------------------------------------------------------------
 
-	  /**
-	   * DOCUMENT ME!
-	   */
-	  @Test public void contextLoads() { }
+	/**
+	 * DOCUMENT ME!
+	 */
+	@Test
+	public void contextLoads() {
+	}
 
-	  //~ ------------------------------------------------------------------------------------------------------------------
+	// ~
+	// ------------------------------------------------------------------------------------------------------------------
 
-	  /**
-	   * DOCUMENT ME!
-	   */
-	  @Test public void getUserTest() {
-	    User user = new User();
-	    user.setUserName("Test");
-	    user.setPassword("Test");
+	/**
+	 * DOCUMENT ME!
+	 */
+	@Test
+	public void getUserTest() {
+		ResponseEntity<?> user1 = userRestController.getUsers(1L);
+		System.out.println(user1.getBody());
+		assertNotNull(user1);
+	}
 
-	    User user1 = userRestController.getUsers(1L);
-	    assertEquals(user.getUserName(), user1.getUserName());
-	  }
+	// ~
+	// ------------------------------------------------------------------------------------------------------------------
 
-	  //~ ------------------------------------------------------------------------------------------------------------------
+	/**
+	 * DOCUMENT ME!
+	 */
+	@Test
+	public void registration() {
+		User user = new User();
+		user.setUserName("Test");
+		user.setPassword("Test");
+		userRestController.registration(user);
+		ResponseEntity<?> user1 = userRestController.getUsers(1L);
+		assertNotNull(user1);
+	}
 
-	  /**
-	   * DOCUMENT ME!
-	   */
-	  @Test public void registration() {
-	    User user = new User();
-	    user.setUserName("Test");
-	    user.setPassword("Test");
-	    userRestController.save(user);
-	    user = userRestController.getUsers(1L);
-	    assertNotNull(user);
-	  }
+	@Test
+	public void updateRegistration() {
+		User user = new User();
+		user.setUserName("Test1");
+		user.setPassword("Test1");
+		user.setId(1L);
+		userRestController.updateRegistration(user);
+		ResponseEntity<?> user1 = userRestController.getUsers(1L);
+		assertNotNull(user1);
+	}
 }
-

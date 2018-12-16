@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.User;
 import com.example.demo.service.UserService;
+import com.example.demo.util.HttpResponseErrors;
+import com.example.demo.util.ErrorMessages;
 import com.example.demo.util.SampleUtil;
 
 /**
@@ -87,7 +89,7 @@ public class UserRestController {
 	 * @return DOCUMENT ME!
 	 */
 	@RequestMapping(value = "/users/{id}", method = RequestMethod.GET)
-	public User getUsers(@PathVariable("id") Long id) {
+	public ResponseEntity<?> getUsers(@PathVariable("id") Long id) {
 		// model.addAttribute("userForm", new User());
 		logger.info("id : " + id);
 		User user = null;
@@ -97,8 +99,13 @@ public class UserRestController {
 				user.setPassword(SampleUtil.decrypt(user.getPassword()));
 		} catch (NoSuchElementException e) {
 			// TODO: handle exception
+			logger.error(e.getMessage());
+			HttpResponseErrors errorMessage = new HttpResponseErrors();
+			errorMessage.setErrorCode(1);
+			errorMessage.setErrorMessage(ErrorMessages.USER_NOT_FOUND);
+			return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
 		}
-		return user;
+		return new ResponseEntity<>(user, HttpStatus.OK);
 	}
 
 	// ~
@@ -111,12 +118,22 @@ public class UserRestController {
 	 *            DOCUMENT ME!
 	 */
 	@RequestMapping(value = "/users/{id}", method = RequestMethod.POST)
-	public void save(@RequestBody User user) {
-		logger.info(user.getPassword());
-		user.setPassword(SampleUtil.encrypt(user.getPassword()));
-
+	public ResponseEntity<?> save(@RequestBody User user) {
+		// logger.info(user.getPassword());
+		try {
+			user.setPassword(SampleUtil.encrypt(user.getPassword()));
+			userService.save(user);
+		} catch (NoSuchElementException e) {
+			// TODO: handle exception
+			logger.error(e.getMessage());
+			HttpResponseErrors errorMessage = new HttpResponseErrors();
+			errorMessage.setErrorCode(2);
+			errorMessage.setErrorMessage(ErrorMessages.FAILED_TO_SAVE);
+			return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+		}
 		// user.setRoles(new HashSet<>(roleRepository.findAll()));
-		userService.save(user);
+
+		return new ResponseEntity<>("Success", HttpStatus.OK);
 	}
 
 	// ~
@@ -191,15 +208,19 @@ public class UserRestController {
 
 	}
 
-	@RequestMapping(value = "/registration/{id}", method = RequestMethod.POST)
-	public ResponseEntity<?> registration(@RequestBody User user,@PathVariable Long id) {
+	@RequestMapping(value = "/registration", method = RequestMethod.PUT)
+	public ResponseEntity<?> updateRegistration(@RequestBody User user) {
 		// logger.info(user.getPassword());
 		try {
-			User user1 = userService.findById(id);
+			if (user.getId() == null) {
+				HttpResponseErrors errorMessage = new HttpResponseErrors();
+				errorMessage.setErrorCode(3);
+				errorMessage.setErrorMessage(ErrorMessages.USER_ID_NOT_FOUND);
+				return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+			}
 			user.setPassword(SampleUtil.encrypt(user.getPassword()));
 			user.setUpdatedDate(new Date());
-			user.setId(id);
-			user.setCreatedDate(user1.getCreatedDate());
+			// user.setCreatedDate(user1.getCreatedDate());
 			userService.save(user);
 			return new ResponseEntity<>(null, HttpStatus.OK);
 		} catch (Exception e) {
