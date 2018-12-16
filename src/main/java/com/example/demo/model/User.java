@@ -1,140 +1,55 @@
 package com.example.demo.model;
 
+import java.util.Date;
 import java.util.Set;
 
 import javax.persistence.*;
 
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * DOCUMENT ME!
  *
- * @author   $author$
- * @version  $Revision$, $Date$
+ * @author $author$
+ * @version $Revision$, $Date$
  */
 @Entity
 @Table(name = "user")
+@Data
+@Getter
+@Setter
+@NoArgsConstructor
 public class User {
-  //~ Instance fields --------------------------------------------------------------------------------------------------
+	// ~ Instance fields
+	// --------------------------------------------------------------------------------------------------
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Id
+	private Long id;
+	@Column(nullable = false)
+	private String password;
+	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+	@ManyToMany
+	private Set<Role> roles;
+	@Column(nullable = false, unique = true)
+	private String userName;
+	@Column(nullable = false)
+	private String firstName;
+	@Column(nullable = false)
+	private String lastName;
+	@Column
+	private String midddleName;
+	@Column
+	private String contactPhone;
+	@Column(nullable = false, unique = true)
+	private String emailAddress;
+	@Column(nullable = false)
+	private String createdBy;
 
-  private Long      id;
-  private String    password;
-  private String    passwordConfirm;
-  private Set<Role> roles;
-  private String    username;
+	private Date createdDate;
 
-  //~ Methods ----------------------------------------------------------------------------------------------------------
+	private Date updatedDate;
 
-  /**
-   * DOCUMENT ME!
-   *
-   * @return  DOCUMENT ME!
-   */
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  @Id public Long getId() {
-    return id;
-  }
-
-  //~ ------------------------------------------------------------------------------------------------------------------
-
-  /**
-   * DOCUMENT ME!
-   *
-   * @return  DOCUMENT ME!
-   */
-  public String getPassword() {
-    return password;
-  }
-
-  //~ ------------------------------------------------------------------------------------------------------------------
-
-  /**
-   * DOCUMENT ME!
-   *
-   * @return  DOCUMENT ME!
-   */
-  @Transient public String getPasswordConfirm() {
-    return passwordConfirm;
-  }
-
-  //~ ------------------------------------------------------------------------------------------------------------------
-
-  /**
-   * DOCUMENT ME!
-   *
-   * @return  DOCUMENT ME!
-   */
-  @JoinTable(
-    name               = "user_role",
-    joinColumns        = @JoinColumn(name = "user_id"),
-    inverseJoinColumns = @JoinColumn(name = "role_id")
-  )
-  @ManyToMany public Set<Role> getRoles() {
-    return roles;
-  }
-
-  //~ ------------------------------------------------------------------------------------------------------------------
-
-  /**
-   * DOCUMENT ME!
-   *
-   * @return  DOCUMENT ME!
-   */
-  public String getUsername() {
-    return username;
-  }
-
-  //~ ------------------------------------------------------------------------------------------------------------------
-
-  /**
-   * DOCUMENT ME!
-   *
-   * @param  id  DOCUMENT ME!
-   */
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  //~ ------------------------------------------------------------------------------------------------------------------
-
-  /**
-   * DOCUMENT ME!
-   *
-   * @param  password  DOCUMENT ME!
-   */
-  public void setPassword(String password) {
-    this.password = password;
-  }
-
-  //~ ------------------------------------------------------------------------------------------------------------------
-
-  /**
-   * DOCUMENT ME!
-   *
-   * @param  passwordConfirm  DOCUMENT ME!
-   */
-  public void setPasswordConfirm(String passwordConfirm) {
-    this.passwordConfirm = passwordConfirm;
-  }
-
-  //~ ------------------------------------------------------------------------------------------------------------------
-
-  /**
-   * DOCUMENT ME!
-   *
-   * @param  roles  DOCUMENT ME!
-   */
-  public void setRoles(Set<Role> roles) {
-    this.roles = roles;
-  }
-
-  //~ ------------------------------------------------------------------------------------------------------------------
-
-  /**
-   * DOCUMENT ME!
-   *
-   * @param  username  DOCUMENT ME!
-   */
-  public void setUsername(String username) {
-    this.username = username;
-  }
 } // end class User

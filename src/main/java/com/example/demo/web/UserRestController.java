@@ -1,5 +1,6 @@
 package com.example.demo.web;
 
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -14,7 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.User;
 import com.example.demo.service.UserService;
+import com.example.demo.util.SampleUtil;
 
 /**
  * DOCUMENT ME!
@@ -36,9 +39,6 @@ import com.example.demo.service.UserService;
 public class UserRestController {
 	// ~ Static fields/initializers
 	// ---------------------------------------------------------------------------------------
-
-	private static final String key = "aesEncryptionKey";
-	private static final String initVector = "encryptionIntVec";
 
 	// ~ Instance fields
 	// --------------------------------------------------------------------------------------------------
@@ -53,60 +53,6 @@ public class UserRestController {
 
 	// ~ Methods
 	// ----------------------------------------------------------------------------------------------------------
-
-	/**
-	 * DOCUMENT ME!
-	 *
-	 * @param encrypted
-	 *            DOCUMENT ME!
-	 *
-	 * @return DOCUMENT ME!
-	 */
-	public static String decrypt(String encrypted) {
-		try {
-			IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
-			SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
-
-			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-			cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
-
-			byte[] original = cipher.doFinal(Base64.decodeBase64(encrypted));
-
-			return new String(original);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-
-		return null;
-	}
-
-	// ~
-	// ------------------------------------------------------------------------------------------------------------------
-
-	/**
-	 * DOCUMENT ME!
-	 *
-	 * @param value
-	 *            DOCUMENT ME!
-	 *
-	 * @return DOCUMENT ME!
-	 */
-	public static String encrypt(String value) {
-		try {
-			IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
-			SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
-			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-			cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
-
-			byte[] encrypted = cipher.doFinal(value.getBytes());
-
-			return Base64.encodeBase64String(encrypted);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-
-		return null;
-	}
 
 	// ~
 	// ------------------------------------------------------------------------------------------------------------------
@@ -148,7 +94,7 @@ public class UserRestController {
 		try {
 			user = userService.findById(id);
 			if (user != null)
-				user.setPassword(decrypt(user.getPassword()));
+				user.setPassword(SampleUtil.decrypt(user.getPassword()));
 		} catch (NoSuchElementException e) {
 			// TODO: handle exception
 		}
@@ -167,7 +113,7 @@ public class UserRestController {
 	@RequestMapping(value = "/users/{id}", method = RequestMethod.POST)
 	public void save(@RequestBody User user) {
 		logger.info(user.getPassword());
-		user.setPassword(encrypt(user.getPassword()));
+		user.setPassword(SampleUtil.encrypt(user.getPassword()));
 
 		// user.setRoles(new HashSet<>(roleRepository.findAll()));
 		userService.save(user);
@@ -213,10 +159,54 @@ public class UserRestController {
 		try {
 			// user = userService.findById(id);
 			if (user != null)
-				user.setPassword(decrypt(user.getPassword()));
+				user.setPassword(SampleUtil.decrypt(user.getPassword()));
 		} catch (NoSuchElementException e) {
 			// TODO: handle exception
 		}
 		return user;
+	}
+	// ------------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * DOCUMENT ME!
+	 *
+	 * @param user
+	 *            DOCUMENT ME!
+	 */
+	@RequestMapping(value = "/registration", method = RequestMethod.POST)
+	public ResponseEntity<?> registration(@RequestBody User user) {
+		// logger.info(user.getPassword());
+		try {
+			user.setPassword(SampleUtil.encrypt(user.getPassword()));
+			user.setCreatedDate(new Date());
+			user.setUpdatedDate(new Date());
+			// user.setRoles(new HashSet<>(roleRepository.findAll()));
+			userService.save(user);
+			return new ResponseEntity<>(null, HttpStatus.OK);
+		} catch (Exception e) {
+			// TODO: handle exception
+			logger.error(e.getMessage());
+			return new ResponseEntity<>("User Already Exist", HttpStatus.ALREADY_REPORTED);
+		}
+
+	}
+
+	@RequestMapping(value = "/registration/{id}", method = RequestMethod.POST)
+	public ResponseEntity<?> registration(@RequestBody User user,@PathVariable Long id) {
+		// logger.info(user.getPassword());
+		try {
+			User user1 = userService.findById(id);
+			user.setPassword(SampleUtil.encrypt(user.getPassword()));
+			user.setUpdatedDate(new Date());
+			user.setId(id);
+			user.setCreatedDate(user1.getCreatedDate());
+			userService.save(user);
+			return new ResponseEntity<>(null, HttpStatus.OK);
+		} catch (Exception e) {
+			// TODO: handle exception
+			logger.error(e.getMessage());
+			return new ResponseEntity<>("User Already Exist", HttpStatus.ALREADY_REPORTED);
+		}
+
 	}
 } // end class UserRestController

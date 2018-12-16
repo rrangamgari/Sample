@@ -33,11 +33,11 @@ public class SampleApplicationTests {
 	   */
 	  @Test public void getUserTest() {
 	    User user = new User();
-	    user.setUsername("Test");
+	    user.setUserName("Test");
 	    user.setPassword("Test");
 
 	    User user1 = userRestController.getUsers(1L);
-	    assertEquals(user.getUsername(), user1.getUsername());
+	    assertEquals(user.getUserName(), user1.getUserName());
 	  }
 
 	  //~ ------------------------------------------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ public class SampleApplicationTests {
 	   */
 	  @Test public void registration() {
 	    User user = new User();
-	    user.setUsername("Test");
+	    user.setUserName("Test");
 	    user.setPassword("Test");
 	    userRestController.save(user);
 	    user = userRestController.getUsers(1L);
