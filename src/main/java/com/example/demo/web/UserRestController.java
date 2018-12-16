@@ -53,41 +53,23 @@ public class UserRestController {
 	@Autowired
 	private UserService userService;
 
-	// ~ Methods
-	// ----------------------------------------------------------------------------------------------------------
-
-	// ~
-	// ------------------------------------------------------------------------------------------------------------------
-
-	/**
-	 * DOCUMENT ME!
-	 *
-	 * @param id
-	 *            DOCUMENT ME!
-	 *
-	 * @return DOCUMENT ME!
-	 */
 	@RequestMapping(value = "/users/{id}", method = RequestMethod.DELETE)
-	public boolean deleteUser(@PathVariable("id") Long id) {
+	public ResponseEntity<?> deleteUser(@PathVariable("id") Long id) {
 		// model.addAttribute("userForm", new User());
 		logger.info("id : " + id);
-
-		userService.delete(id);
-
-		return true;
+		try {
+			userService.delete(id);
+		} catch (Exception e) {
+			// TODO: handle exception
+			logger.error(e.getMessage());
+			HttpResponseErrors errorMessage = new HttpResponseErrors();
+			errorMessage.setErrorCode(1);
+			errorMessage.setErrorMessage(ErrorMessages.USER_NOT_FOUND);
+			return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>("Successfully deleted", HttpStatus.OK);
 	}
 
-	// ~
-	// ------------------------------------------------------------------------------------------------------------------
-
-	/**
-	 * DOCUMENT ME!
-	 *
-	 * @param id
-	 *            DOCUMENT ME!
-	 *
-	 * @return DOCUMENT ME!
-	 */
 	@RequestMapping(value = "/users/{id}", method = RequestMethod.GET)
 	public ResponseEntity<?> getUsers(@PathVariable("id") Long id) {
 		// model.addAttribute("userForm", new User());
@@ -108,15 +90,6 @@ public class UserRestController {
 		return new ResponseEntity<>(user, HttpStatus.OK);
 	}
 
-	// ~
-	// ------------------------------------------------------------------------------------------------------------------
-
-	/**
-	 * DOCUMENT ME!
-	 *
-	 * @param user
-	 *            DOCUMENT ME!
-	 */
 	@RequestMapping(value = "/users/{id}", method = RequestMethod.POST)
 	public ResponseEntity<?> save(@RequestBody User user) {
 		// logger.info(user.getPassword());
@@ -134,27 +107,6 @@ public class UserRestController {
 		// user.setRoles(new HashSet<>(roleRepository.findAll()));
 
 		return new ResponseEntity<>("Success", HttpStatus.OK);
-	}
-
-	// ~
-	// ------------------------------------------------------------------------------------------------------------------
-
-	/**
-	 * DOCUMENT ME!
-	 *
-	 * @param id
-	 *            DOCUMENT ME!
-	 *
-	 * @return DOCUMENT ME!
-	 */
-	@RequestMapping(value = "/users/{id}", method = RequestMethod.PUT)
-	public User updateUsers(@PathVariable("id") Long id) {
-		// model.addAttribute("userForm", new User());
-		logger.info("id : " + id);
-
-		User user = userService.findById(id);
-
-		return user;
 	}
 
 	@RequestMapping(value = "/users", method = RequestMethod.GET)
@@ -203,30 +155,38 @@ public class UserRestController {
 		} catch (Exception e) {
 			// TODO: handle exception
 			logger.error(e.getMessage());
-			return new ResponseEntity<>("User Already Exist", HttpStatus.ALREADY_REPORTED);
+			HttpResponseErrors errorMessage = new HttpResponseErrors();
+			errorMessage.setErrorCode(5);
+			errorMessage.setErrorMessage(ErrorMessages.FAILED_TO_SAVE);
+			return new ResponseEntity<>(errorMessage, HttpStatus.ALREADY_REPORTED);
 		}
 
 	}
 
-	@RequestMapping(value = "/registration", method = RequestMethod.PUT)
-	public ResponseEntity<?> updateRegistration(@RequestBody User user) {
+	@RequestMapping(value = "/users/{id}", method = RequestMethod.PUT)
+	public ResponseEntity<?> updateUsers(@RequestBody User user, @PathVariable Long id) {
 		// logger.info(user.getPassword());
 		try {
-			if (user.getId() == null) {
+			if (id == null) {
 				HttpResponseErrors errorMessage = new HttpResponseErrors();
 				errorMessage.setErrorCode(3);
 				errorMessage.setErrorMessage(ErrorMessages.USER_ID_NOT_FOUND);
 				return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
 			}
+			User user1 = userService.findById(id);
 			user.setPassword(SampleUtil.encrypt(user.getPassword()));
 			user.setUpdatedDate(new Date());
-			// user.setCreatedDate(user1.getCreatedDate());
+			user.setCreatedDate(user1.getCreatedDate());
+			user.setId(id);
 			userService.save(user);
 			return new ResponseEntity<>(null, HttpStatus.OK);
 		} catch (Exception e) {
 			// TODO: handle exception
 			logger.error(e.getMessage());
-			return new ResponseEntity<>("User Already Exist", HttpStatus.ALREADY_REPORTED);
+			HttpResponseErrors errorMessage = new HttpResponseErrors();
+			errorMessage.setErrorCode(6);
+			errorMessage.setErrorMessage(ErrorMessages.FAILED_TO_SAVE);
+			return new ResponseEntity<>(errorMessage, HttpStatus.BAD_GATEWAY);
 		}
 
 	}

@@ -65,7 +65,7 @@ public class SampleApplicationTests {
 		user.setUserName("Test1");
 		user.setPassword("Test1");
 		user.setId(1L);
-		userRestController.updateRegistration(user);
+		userRestController.updateUsers(user, 1L);
 		ResponseEntity<?> user1 = userRestController.getUsers(1L);
 		assertNotNull(user1);
 	}
