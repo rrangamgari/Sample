@@ -28,7 +28,7 @@ import com.example.demo.model.User;
 import com.example.demo.service.UserService;
 import com.example.demo.util.HttpResponseErrors;
 import com.example.demo.util.MyHttpResponse;
-import com.example.demo.util.ErrorMessages;
+import com.example.demo.util.Messages;
 import com.example.demo.util.SampleUtil;
 
 /**
@@ -67,7 +67,7 @@ public class UserRestController {
 			logger.error(e.getMessage());
 			HttpResponseErrors errorMessage = new HttpResponseErrors();
 			errorMessage.setErrorCode(1);
-			errorMessage.setErrorMessage(ErrorMessages.USER_NOT_FOUND);
+			errorMessage.setErrorMessage(Messages.USER_NOT_FOUND);
 			response.setMessage(errorMessage);
 			response.setStatus("failure");
 			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -92,7 +92,7 @@ public class UserRestController {
 			logger.error(e.getMessage());
 			HttpResponseErrors errorMessage = new HttpResponseErrors();
 			errorMessage.setErrorCode(1);
-			errorMessage.setErrorMessage(ErrorMessages.USER_NOT_FOUND);
+			errorMessage.setErrorMessage(Messages.USER_NOT_FOUND);
 			response.setMessage(errorMessage);
 			response.setStatus("failure");
 			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -113,7 +113,7 @@ public class UserRestController {
 			logger.error(e.getMessage());
 			HttpResponseErrors errorMessage = new HttpResponseErrors();
 			errorMessage.setErrorCode(2);
-			errorMessage.setErrorMessage(ErrorMessages.FAILED_TO_SAVE);
+			errorMessage.setErrorMessage(Messages.FAILED_TO_SAVE);
 			response.setMessage(errorMessage);
 			response.setStatus("failure");
 			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -138,7 +138,7 @@ public class UserRestController {
 			logger.error(e.getMessage());
 			HttpResponseErrors errorMessage = new HttpResponseErrors();
 			errorMessage.setErrorCode(6);
-			errorMessage.setErrorMessage(ErrorMessages.USER_NOT_FOUND);
+			errorMessage.setErrorMessage(Messages.USER_NOT_FOUND);
 			response.setMessage(errorMessage);
 			response.setStatus("failure");
 			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -186,7 +186,7 @@ public class UserRestController {
 			logger.error(e.getMessage());
 			HttpResponseErrors errorMessage = new HttpResponseErrors();
 			errorMessage.setErrorCode(5);
-			errorMessage.setErrorMessage(ErrorMessages.FAILED_TO_SAVE);
+			errorMessage.setErrorMessage(Messages.FAILED_TO_SAVE);
 			response.setMessage(errorMessage);
 			response.setStatus("failure");
 			return new ResponseEntity<>(response, HttpStatus.ALREADY_REPORTED);
@@ -203,7 +203,7 @@ public class UserRestController {
 			if (id == null) {
 				HttpResponseErrors errorMessage = new HttpResponseErrors();
 				errorMessage.setErrorCode(3);
-				errorMessage.setErrorMessage(ErrorMessages.USER_ID_NOT_FOUND);
+				errorMessage.setErrorMessage(Messages.USER_ID_NOT_FOUND);
 				response.setMessage(errorMessage);
 				response.setStatus("failure");
 				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -221,7 +221,7 @@ public class UserRestController {
 			logger.error(e.getMessage());
 			HttpResponseErrors errorMessage = new HttpResponseErrors();
 			errorMessage.setErrorCode(6);
-			errorMessage.setErrorMessage(ErrorMessages.FAILED_TO_SAVE);
+			errorMessage.setErrorMessage(Messages.FAILED_TO_SAVE);
 			response.setMessage(errorMessage);
 			response.setStatus("failure");
 			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);

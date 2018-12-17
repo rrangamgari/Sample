@@ -4,13 +4,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
 
 import com.example.demo.model.User;
+import com.example.demo.model.UserActivity;
 import com.example.demo.repository.RoleRepository;
+import com.example.demo.repository.UserActivityRepository;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.util.AuditTrail;
+import com.example.demo.web.UserRestController;
 
 /**
  * DOCUMENT ME!
@@ -27,7 +33,10 @@ public class UserServiceImpl implements UserService {
 	private RoleRepository roleRepository;
 	@Autowired
 	private UserRepository userRepository;
-
+	@Autowired
+	private UserActivityRepository auditTrail;
+	
+	Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 	// ~ Methods
 	// ----------------------------------------------------------------------------------------------------------
 
@@ -47,8 +56,11 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public User findById(Long id) {
+		logger.info("id : " + id);
 		Optional<User> user = userRepository.findById(id);
-
+		UserActivity userActivity= new UserActivity();
+		userActivity.setActivitySummary(AuditTrail.GET.toString());
+		auditTrail.save(userActivity);
 		return user.get();
 	}
 
