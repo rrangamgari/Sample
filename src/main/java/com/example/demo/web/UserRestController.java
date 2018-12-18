@@ -1,15 +1,10 @@
 package com.example.demo.web;
 
-import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import javax.websocket.server.PathParam;
-
-import org.apache.tomcat.util.codec.binary.Base64;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,67 +50,55 @@ public class UserRestController {
 	private UserService userService;
 
 	@RequestMapping(value = "/users/{id}", method = RequestMethod.DELETE)
-	public ResponseEntity<?> deleteUser(@PathVariable("id") Long id) {
+	public ResponseEntity<?> deleteUser(@PathVariable("id") Long id, HttpServletRequest request,
+			HttpSession httpSession) {
 		// model.addAttribute("userForm", new User());
 		logger.info("id : " + id);
 		MyHttpResponse response = new MyHttpResponse();
 		try {
-			userService.delete(id);
+			userService.delete(id, (Long) httpSession.getAttribute("userId"));
 			response.setStatus("Success");
 		} catch (Exception e) {
 			// TODO: handle exception
 			logger.error(e.getMessage());
-			HttpResponseErrors errorMessage = new HttpResponseErrors();
-			errorMessage.setErrorCode(1);
-			errorMessage.setErrorMessage(Messages.USER_NOT_FOUND);
-			response.setMessage(errorMessage);
-			response.setStatus("failure");
+			response = addErrorMessages(response, 1);
 			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 		}
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "/users/{id}", method = RequestMethod.GET)
-	public ResponseEntity<?> getUsers(@PathVariable("id") Long id) {
+	public ResponseEntity<?> getUsers(@PathVariable("id") Long id, HttpServletRequest request,
+			HttpSession httpSession) {
 		// model.addAttribute("userForm", new User());
 		logger.info("id : " + id);
 		User user = null;
 		MyHttpResponse response = new MyHttpResponse();
 		try {
 			user = userService.findById(id);
-			if (user != null)
-				user.setPassword(SampleUtil.decrypt(user.getPassword()));
+
 			response.setData(user);
 			response.setStatus("success");
 		} catch (NoSuchElementException e) {
 			// TODO: handle exception
 			logger.error(e.getMessage());
-			HttpResponseErrors errorMessage = new HttpResponseErrors();
-			errorMessage.setErrorCode(1);
-			errorMessage.setErrorMessage(Messages.USER_NOT_FOUND);
-			response.setMessage(errorMessage);
-			response.setStatus("failure");
+			response = addErrorMessages(response, 1);
 			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 		}
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "/users/{id}", method = RequestMethod.POST)
-	public ResponseEntity<?> save(@RequestBody User user) {
+	public ResponseEntity<?> save(@RequestBody User user, HttpServletRequest request, HttpSession httpSession) {
 		// logger.info(user.getPassword());
 		MyHttpResponse response = new MyHttpResponse();
 		try {
-			user.setPassword(SampleUtil.encrypt(user.getPassword()));
 			userService.save(user);
 			response.setStatus("success");
 		} catch (NoSuchElementException e) {
 			// TODO: handle exception
 			logger.error(e.getMessage());
-			HttpResponseErrors errorMessage = new HttpResponseErrors();
-			errorMessage.setErrorCode(2);
-			errorMessage.setErrorMessage(Messages.FAILED_TO_SAVE);
-			response.setMessage(errorMessage);
-			response.setStatus("failure");
+			response = addErrorMessages(response, 6);
 			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 		}
 		// user.setRoles(new HashSet<>(roleRepository.findAll()));
@@ -124,8 +107,7 @@ public class UserRestController {
 	}
 
 	@RequestMapping(value = "/users", method = RequestMethod.GET)
-	public ResponseEntity<?> getUsers() {
-		// model.addAttribute("userForm", new User());
+	public ResponseEntity<?> getUsers(HttpServletRequest request, HttpSession httpSession) {
 		logger.info("id : ");
 		MyHttpResponse response = new MyHttpResponse();
 		try {
@@ -134,32 +116,33 @@ public class UserRestController {
 			response.setData(user);
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
-			// TODO: handle exception
 			logger.error(e.getMessage());
-			HttpResponseErrors errorMessage = new HttpResponseErrors();
-			errorMessage.setErrorCode(6);
-			errorMessage.setErrorMessage(Messages.USER_NOT_FOUND);
-			response.setMessage(errorMessage);
-			response.setStatus("failure");
+			response = addErrorMessages(response, 1);
 			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 		}
 
 	}
 
 	@RequestMapping(value = "/users/search", method = RequestMethod.GET)
-	public User searchUsers(@RequestParam("q") String query, @RequestParam("v") String value) {
-		// model.addAttribute("userForm", new User());
+	public ResponseEntity<?> searchUsers(@RequestParam("q") String query, @RequestParam("v") String value,
+			HttpServletRequest request, HttpSession httpSession) {
 		logger.info("query : " + query);
 		logger.info("value : " + value);
 		User user = null;
+		MyHttpResponse response = new MyHttpResponse();
 		try {
 			// user = userService.findById(id);
 			if (user != null)
 				user.setPassword(SampleUtil.decrypt(user.getPassword()));
+			response.setStatus("success");
+			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (NoSuchElementException e) {
 			// TODO: handle exception
+			logger.error(e.getMessage());
+			response = addErrorMessages(response, 4);
+			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 		}
-		return user;
+
 	}
 	// ------------------------------------------------------------------------------------------------------------------
 
@@ -170,62 +153,71 @@ public class UserRestController {
 	 *            DOCUMENT ME!
 	 */
 	@RequestMapping(value = "/registration", method = RequestMethod.POST)
-	public ResponseEntity<?> registration(@RequestBody User user) {
-		// logger.info(user.getPassword());
+	public ResponseEntity<?> registration(@RequestBody User user, HttpServletRequest request, HttpSession httpSession) {
+		logger.info("registration");
 		MyHttpResponse response = new MyHttpResponse();
 		try {
-			user.setPassword(SampleUtil.encrypt(user.getPassword()));
-			user.setCreatedDate(new Date());
-			user.setUpdatedDate(new Date());
-			// user.setRoles(new HashSet<>(roleRepository.findAll()));
 			userService.save(user);
 			response.setStatus("success");
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
-			// TODO: handle exception
 			logger.error(e.getMessage());
-			HttpResponseErrors errorMessage = new HttpResponseErrors();
-			errorMessage.setErrorCode(5);
-			errorMessage.setErrorMessage(Messages.FAILED_TO_SAVE);
-			response.setMessage(errorMessage);
-			response.setStatus("failure");
+			response = addErrorMessages(response, 5);
 			return new ResponseEntity<>(response, HttpStatus.ALREADY_REPORTED);
 		}
 
 	}
 
 	@RequestMapping(value = "/users/{id}", method = RequestMethod.PUT)
-	public ResponseEntity<?> updateUsers(@RequestBody User user, @PathVariable Long id) {
-		// logger.info(user.getPassword());
+	public ResponseEntity<?> updateUsers(@RequestBody User user, @PathVariable Long id, HttpServletRequest request,
+			HttpSession httpSession) {
 		MyHttpResponse response = new MyHttpResponse();
 		try {
 
 			if (id == null) {
-				HttpResponseErrors errorMessage = new HttpResponseErrors();
-				errorMessage.setErrorCode(3);
-				errorMessage.setErrorMessage(Messages.USER_ID_NOT_FOUND);
-				response.setMessage(errorMessage);
-				response.setStatus("failure");
+				response = addErrorMessages(response, 3);
 				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			}
-			User user1 = userService.findById(id);
-			user.setPassword(SampleUtil.encrypt(user.getPassword()));
-			user.setUpdatedDate(new Date());
-			user.setCreatedDate(user1.getCreatedDate());
-			user.setId(id);
-			userService.save(user);
+			userService.updateUser(user, id);
 			response.setStatus("success");
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
-			// TODO: handle exception
 			logger.error(e.getMessage());
-			HttpResponseErrors errorMessage = new HttpResponseErrors();
-			errorMessage.setErrorCode(6);
-			errorMessage.setErrorMessage(Messages.FAILED_TO_SAVE);
-			response.setMessage(errorMessage);
-			response.setStatus("failure");
+			response = addErrorMessages(response, 6);
 			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 		}
 
+	}
+
+	private MyHttpResponse addErrorMessages(MyHttpResponse response, int errorCode) {
+		HttpResponseErrors errorMessage = new HttpResponseErrors();
+		errorMessage.setErrorCode(errorCode);
+
+		switch (errorCode) {
+		case 1:
+			errorMessage.setErrorMessage(Messages.USER_NOT_FOUND);
+			break;
+		case 2:
+			errorMessage.setErrorMessage(Messages.FAILED_TO_SAVE);
+			break;
+		case 3:
+			errorMessage.setErrorMessage(Messages.USER_ID_NOT_FOUND);
+			break;
+		case 4:
+			errorMessage.setErrorMessage(Messages.FAILED_TO_SAVE);
+			break;
+		case 5:
+			errorMessage.setErrorMessage(Messages.FAILED_TO_CREATE);
+			break;
+		case 6:
+			errorMessage.setErrorMessage(Messages.FAILED_TO_SAVE);
+			break;
+		default:
+			errorMessage.setErrorMessage(Messages.DEFAULT_ERROR_MESSAGE);
+			break;
+		}
+		response.setMessage(errorMessage);
+		response.setStatus("failure");
+		return response;
 	}
 } // end class UserRestController

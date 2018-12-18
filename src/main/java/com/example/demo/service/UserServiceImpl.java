@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +17,8 @@ import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserActivityRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.util.AuditTrail;
+import com.example.demo.util.AuditTrailUtil;
+import com.example.demo.util.SampleUtil;
 import com.example.demo.web.UserRestController;
 
 /**
@@ -33,9 +36,7 @@ public class UserServiceImpl implements UserService {
 	private RoleRepository roleRepository;
 	@Autowired
 	private UserRepository userRepository;
-	@Autowired
-	private UserActivityRepository auditTrail;
-	
+
 	Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 	// ~ Methods
 	// ----------------------------------------------------------------------------------------------------------
@@ -44,8 +45,9 @@ public class UserServiceImpl implements UserService {
 	 * @see UserService#delete(java.lang.Long)
 	 */
 	@Override
-	public void delete(Long id) {
+	public void delete(Long id, Long user) {
 		userRepository.deleteById(id);
+		AuditTrailUtil.audit(AuditTrail.DELETE.toString(), "Delete the ID :" + id, user);
 	}
 
 	// ~
@@ -58,9 +60,8 @@ public class UserServiceImpl implements UserService {
 	public User findById(Long id) {
 		logger.info("id : " + id);
 		Optional<User> user = userRepository.findById(id);
-		UserActivity userActivity= new UserActivity();
-		userActivity.setActivitySummary(AuditTrail.GET.toString());
-		auditTrail.save(userActivity);
+		if (user != null)
+			user.get().setPassword(SampleUtil.decrypt(user.get().getPassword()));
 		return user.get();
 	}
 
@@ -83,7 +84,9 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public void save(User user) {
-		user.setPassword(user.getPassword());
+		user.setPassword(SampleUtil.encrypt(user.getPassword()));
+		user.setCreatedDate(new Date());
+		user.setUpdatedDate(new Date());
 		user.setRoles(new HashSet<>(roleRepository.findAll()));
 		userRepository.save(user);
 	}
@@ -92,6 +95,16 @@ public class UserServiceImpl implements UserService {
 	public List<User> findAll() {
 		// TODO Auto-generated method stub
 		return userRepository.findAll();
+	}
+
+	@Override
+	public void updateUser(User user, Long id) {
+		User user1 = findById(id);
+		user.setPassword(SampleUtil.encrypt(user.getPassword()));
+		user.setUpdatedDate(new Date());
+		user.setCreatedDate(user1.getCreatedDate());
+		user.setId(id);
+		userRepository.save(user);
 	}
 
 } // end class UserServiceImpl
