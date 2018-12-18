@@ -36,7 +36,7 @@ public class SampleApplicationTests {
 	/**
 	 * DOCUMENT ME!
 	 */
-	@Test
+	/*@Test
 	public void getUserTest() {
 		ResponseEntity<?> user1 = userRestController.getUsers(1L);
 		System.out.println(user1.getBody());
@@ -46,9 +46,9 @@ public class SampleApplicationTests {
 	// ~
 	// ------------------------------------------------------------------------------------------------------------------
 
-	/**
+	*//**
 	 * DOCUMENT ME!
-	 */
+	 *//*
 	@Test
 	public void registration() {
 		User user = new User();
@@ -68,5 +68,5 @@ public class SampleApplicationTests {
 		userRestController.updateUsers(user, 1L);
 		ResponseEntity<?> user1 = userRestController.getUsers(1L);
 		assertNotNull(user1);
-	}
+	}*/
 }
