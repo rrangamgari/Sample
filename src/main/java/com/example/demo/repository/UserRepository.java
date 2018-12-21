@@ -2,7 +2,7 @@ package com.example.demo.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.example.demo.model.User;
+import com.example.demo.model.Account;
 
 
 
@@ -12,7 +12,7 @@ import com.example.demo.model.User;
  * @author   $author$
  * @version  $Revision$, $Date$
  */
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<Account, Long> {
   //~ Methods ----------------------------------------------------------------------------------------------------------
 
   /**
@@ -22,5 +22,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
    *
    * @return  DOCUMENT ME!
    */
-  User findByUserName(String userName);
+  Account findByUserName(String userName);
 }

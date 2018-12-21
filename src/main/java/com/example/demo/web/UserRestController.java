@@ -11,7 +11,9 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.model.User;
+import com.example.demo.model.Account;
 import com.example.demo.service.UserService;
 import com.example.demo.util.HttpResponseErrors;
 import com.example.demo.util.MyHttpResponse;
@@ -45,6 +47,8 @@ public class UserRestController {
 	Logger logger = LoggerFactory.getLogger(UserRestController.class);
 
 	/** DOCUMENT ME! */
+	@Autowired
+	protected AuthenticationManager authenticationManager;
 
 	@Autowired
 	private UserService userService;
@@ -67,12 +71,12 @@ public class UserRestController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/users/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/api/users/{id}", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> getUsers(@PathVariable("id") Long id, HttpServletRequest request,
 			HttpSession httpSession) {
 		// model.addAttribute("userForm", new User());
 		logger.info("id : " + id);
-		User user = null;
+		Account user = null;
 		MyHttpResponse response = new MyHttpResponse();
 		try {
 			user = userService.findById(id);
@@ -89,7 +93,7 @@ public class UserRestController {
 	}
 
 	@RequestMapping(value = "/users/{id}", method = RequestMethod.POST)
-	public ResponseEntity<?> save(@RequestBody User user, HttpServletRequest request, HttpSession httpSession) {
+	public ResponseEntity<?> save(@RequestBody Account user, HttpServletRequest request, HttpSession httpSession) {
 		// logger.info(user.getPassword());
 		MyHttpResponse response = new MyHttpResponse();
 		try {
@@ -111,7 +115,7 @@ public class UserRestController {
 		logger.info("id : ");
 		MyHttpResponse response = new MyHttpResponse();
 		try {
-			List<User> user = userService.findAll();
+			List<Account> user = userService.findAll();
 			response.setStatus("success");
 			response.setData(user);
 			return new ResponseEntity<>(response, HttpStatus.OK);
@@ -128,7 +132,7 @@ public class UserRestController {
 			HttpServletRequest request, HttpSession httpSession) {
 		logger.info("query : " + query);
 		logger.info("value : " + value);
-		User user = null;
+		Account user = null;
 		MyHttpResponse response = new MyHttpResponse();
 		try {
 			// user = userService.findById(id);
@@ -153,7 +157,8 @@ public class UserRestController {
 	 *            DOCUMENT ME!
 	 */
 	@RequestMapping(value = "/registration", method = RequestMethod.POST)
-	public ResponseEntity<?> registration(@RequestBody User user, HttpServletRequest request, HttpSession httpSession) {
+	public ResponseEntity<?> registration(@RequestBody Account user, HttpServletRequest request,
+			HttpSession httpSession) {
 		logger.info("registration");
 		MyHttpResponse response = new MyHttpResponse();
 		try {
@@ -168,8 +173,24 @@ public class UserRestController {
 
 	}
 
+	@RequestMapping(value = "/roles", method = RequestMethod.GET)
+	public ResponseEntity<?> addRoles(HttpServletRequest request, HttpSession httpSession) {
+		logger.info("registration");
+		MyHttpResponse response = new MyHttpResponse();
+		try {
+			userService.updateRoles();
+			response.setStatus("success");
+			return new ResponseEntity<>(response, HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			response = addErrorMessages(response, 5);
+			return new ResponseEntity<>(response, HttpStatus.ALREADY_REPORTED);
+		}
+
+	}
+
 	@RequestMapping(value = "/users/{id}", method = RequestMethod.PUT)
-	public ResponseEntity<?> updateUsers(@RequestBody User user, @PathVariable Long id, HttpServletRequest request,
+	public ResponseEntity<?> updateUsers(@RequestBody Account user, @PathVariable Long id, HttpServletRequest request,
 			HttpSession httpSession) {
 		MyHttpResponse response = new MyHttpResponse();
 		try {

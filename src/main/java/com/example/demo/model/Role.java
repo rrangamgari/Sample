@@ -23,7 +23,14 @@ public class Role {
 	private Long id;
 	@Column
 	private String name;
-	@ManyToMany(mappedBy = "roles")
-	private Set<User> users;
+
+	public Role(Long id, String name) {
+		this.id = id;
+		this.name = name;
+	}
+
+	public Role() {
+		super();
+	}
 
 } // end class Role

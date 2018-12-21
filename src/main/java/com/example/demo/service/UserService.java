@@ -2,7 +2,7 @@ package com.example.demo.service;
 
 import java.util.List;
 
-import com.example.demo.model.User;
+import com.example.demo.model.Account;
 
 /**
  * DOCUMENT ME!
@@ -11,56 +11,19 @@ import com.example.demo.model.User;
  * @version $Revision$, $Date$
  */
 public interface UserService {
-	// ~ Methods
-	// ----------------------------------------------------------------------------------------------------------
 
-	/**
-	 * DOCUMENT ME!
-	 *
-	 * @param id
-	 *            DOCUMENT ME!
-	 */
 	void delete(Long id, Long user);
 
-	// ~
-	// ------------------------------------------------------------------------------------------------------------------
+	Account findById(Long id);
 
-	/**
-	 * DOCUMENT ME!
-	 *
-	 * @param id
-	 *            DOCUMENT ME!
-	 *
-	 * @return DOCUMENT ME!
-	 */
-	User findById(Long id);
+	Account findByUsername(String username);
 
-	// ~
-	// ------------------------------------------------------------------------------------------------------------------
+	void save(Account user);
 
-	/**
-	 * DOCUMENT ME!
-	 *
-	 * @param username
-	 *            DOCUMENT ME!
-	 *
-	 * @return DOCUMENT ME!
-	 */
-	User findByUsername(String username);
+	List<Account> findAll();
 
-	// ~
-	// ------------------------------------------------------------------------------------------------------------------
+	void updateUser(Account user, Long id);
 
-	/**
-	 * DOCUMENT ME!
-	 *
-	 * @param user
-	 *            DOCUMENT ME!
-	 */
-	void save(User user);
-
-	List<User> findAll();
-
-	void updateUser(User user,Long id);
+	void updateRoles();
 
 } // end interface UserService

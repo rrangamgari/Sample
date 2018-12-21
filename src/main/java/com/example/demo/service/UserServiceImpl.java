@@ -8,10 +8,11 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.model.User;
+import com.example.demo.model.Account;
+import com.example.demo.model.Role;
 import com.example.demo.model.UserActivity;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserActivityRepository;
@@ -57,11 +58,11 @@ public class UserServiceImpl implements UserService {
 	 * @see UserService#findById(java.lang.Long)
 	 */
 	@Override
-	public User findById(Long id) {
+	public Account findById(Long id) {
 		logger.info("id : " + id);
-		Optional<User> user = userRepository.findById(id);
-		if (user != null)
-			user.get().setPassword(SampleUtil.decrypt(user.get().getPassword()));
+		Optional<Account> user = userRepository.findById(id);
+		//if (user != null)
+			//user.get().setPassword(SampleUtil.decrypt(user.get().getPassword()));
 		return user.get();
 	}
 
@@ -72,7 +73,7 @@ public class UserServiceImpl implements UserService {
 	 * @see UserService#findByUsername(java.lang.String)
 	 */
 	@Override
-	public User findByUsername(String username) {
+	public Account findByUsername(String username) {
 		return userRepository.findByUserName(username);
 	}
 
@@ -80,11 +81,12 @@ public class UserServiceImpl implements UserService {
 	// ------------------------------------------------------------------------------------------------------------------
 
 	/**
-	 * @see UserService#save(User)
+	 * @see UserService#save(Account)
 	 */
 	@Override
-	public void save(User user) {
-		user.setPassword(SampleUtil.encrypt(user.getPassword()));
+	public void save(Account user) {
+		//user.setPassword(SampleUtil.encrypt(user.getPassword()));
+		user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
 		user.setCreatedDate(new Date());
 		user.setUpdatedDate(new Date());
 		user.setRoles(new HashSet<>(roleRepository.findAll()));
@@ -92,19 +94,27 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<User> findAll() {
+	public List<Account> findAll() {
 		// TODO Auto-generated method stub
 		return userRepository.findAll();
 	}
 
 	@Override
-	public void updateUser(User user, Long id) {
-		User user1 = findById(id);
+	public void updateUser(Account user, Long id) {
+		Account user1 = findById(id);
 		user.setPassword(SampleUtil.encrypt(user.getPassword()));
 		user.setUpdatedDate(new Date());
 		user.setCreatedDate(user1.getCreatedDate());
 		user.setId(id);
 		userRepository.save(user);
+	}
+
+	@Override
+	public void updateRoles() {
+		Role role = new Role(1L, "ADMIN");
+		roleRepository.save(role);
+		role = new Role(2L, "USER");
+		roleRepository.save(role);
 	}
 
 } // end class UserServiceImpl

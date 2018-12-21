@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.example.demo.model.User;
+import com.example.demo.model.Account;
 import com.example.demo.web.UserRestController;
 
 @RunWith(SpringRunner.class)
