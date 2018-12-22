@@ -115,9 +115,9 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void updateRoles() {
 		Role role = new Role(1L, "ADMIN");
-		roleRepository.save(role);
-		//role = new Role(2L, "USER");
-		//roleRepository.save(role);
+		roleRepository.saveAndFlush(role);
+		// role = new Role(2L, "USER");
+		// roleRepository.save(role);
 	}
 
 	@Override

@@ -72,7 +72,7 @@ public class UserRestController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/api/users/{id}", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/api/users/{id}", method = RequestMethod.GET,  produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> getUsers(@PathVariable("id") Long id, HttpServletRequest request,
 			HttpSession httpSession) {
 		// model.addAttribute("userForm", new User());

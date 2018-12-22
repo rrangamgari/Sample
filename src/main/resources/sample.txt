@@ -5,17 +5,35 @@ http://localhost:8080/sample/addroles
 
 http://localhost:8080/sample/registration
 {
-  
   "userName":"Test",
   "password":"Test",
   "firstName":"firstName",
   "lastName":"lastName",
   "midddleName":"midddleName",
   "contactPhone":"contactPhone",
-  "emailAddress":"emailAddr@gm1ail1.com",
+  "emailAddress":"emailAddress@gmail.com",
   "createdBy":"createdBy",
   "expired":"false",
-"locked":"false",
-	"credentialsExpired":"false",
-	"enabled":"true"
+  "locked":"false",
+  "credentialsExpired":"false",
+  "enabled":"true"
+}
+
+@SpringBootApplication  
+public class Application {
+
+@Autowired
+private UserRepository userRepository;
+
+public static void main(String[] args) {
+    SpringApplication.run(Application.class, args);
+}
+
+@Bean
+InitializingBean sendDatabase() {
+    return () -> {
+        userRepository.save(new User("John"));
+        userRepository.save(new User("Rambo"));
+      };
+   }
 }
