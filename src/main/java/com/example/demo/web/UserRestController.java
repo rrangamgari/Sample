@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.Account;
+import com.example.demo.model.UserRole;
 import com.example.demo.service.UserService;
 import com.example.demo.util.HttpResponseErrors;
 import com.example.demo.util.MyHttpResponse;
@@ -173,13 +174,14 @@ public class UserRestController {
 
 	}
 
-	@RequestMapping(value = "/roles", method = RequestMethod.GET)
+	@RequestMapping(value = "/addroles", method = RequestMethod.GET)
 	public ResponseEntity<?> addRoles(HttpServletRequest request, HttpSession httpSession) {
 		logger.info("registration");
 		MyHttpResponse response = new MyHttpResponse();
 		try {
 			userService.updateRoles();
 			response.setStatus("success");
+			
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
@@ -240,5 +242,22 @@ public class UserRestController {
 		response.setMessage(errorMessage);
 		response.setStatus("failure");
 		return response;
+	}
+
+	@RequestMapping(value = "/roles", method = RequestMethod.GET)
+	public ResponseEntity<?> getRoles(HttpServletRequest request, HttpSession httpSession) {
+		logger.info("getRoles");
+		MyHttpResponse response = new MyHttpResponse();
+		try {
+			List<UserRole> role = userService.getRoles();
+			response.setStatus("success");
+			response.setData(role);
+			return new ResponseEntity<>(response, HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			response = addErrorMessages(response, 5);
+			return new ResponseEntity<>(response, HttpStatus.ALREADY_REPORTED);
+		}
+
 	}
 } // end class UserRestController

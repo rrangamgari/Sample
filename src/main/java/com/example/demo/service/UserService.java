@@ -3,6 +3,7 @@ package com.example.demo.service;
 import java.util.List;
 
 import com.example.demo.model.Account;
+import com.example.demo.model.UserRole;
 
 /**
  * DOCUMENT ME!
@@ -25,5 +26,7 @@ public interface UserService {
 	void updateUser(Account user, Long id);
 
 	void updateRoles();
+
+	List<UserRole> getRoles();
 
 } // end interface UserService

@@ -14,9 +14,11 @@ import org.springframework.stereotype.Service;
 import com.example.demo.model.Account;
 import com.example.demo.model.Role;
 import com.example.demo.model.UserActivity;
+import com.example.demo.model.UserRole;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserActivityRepository;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.repository.UserRoleRepository;
 import com.example.demo.util.AuditTrail;
 import com.example.demo.util.AuditTrailUtil;
 import com.example.demo.util.SampleUtil;
@@ -37,7 +39,8 @@ public class UserServiceImpl implements UserService {
 	private RoleRepository roleRepository;
 	@Autowired
 	private UserRepository userRepository;
-
+	@Autowired
+	private UserRoleRepository userRoleRepository;
 	Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 	// ~ Methods
 	// ----------------------------------------------------------------------------------------------------------
@@ -61,8 +64,8 @@ public class UserServiceImpl implements UserService {
 	public Account findById(Long id) {
 		logger.info("id : " + id);
 		Optional<Account> user = userRepository.findById(id);
-		//if (user != null)
-			//user.get().setPassword(SampleUtil.decrypt(user.get().getPassword()));
+		// if (user != null)
+		// user.get().setPassword(SampleUtil.decrypt(user.get().getPassword()));
 		return user.get();
 	}
 
@@ -85,7 +88,7 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public void save(Account user) {
-		//user.setPassword(SampleUtil.encrypt(user.getPassword()));
+		// user.setPassword(SampleUtil.encrypt(user.getPassword()));
 		user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
 		user.setCreatedDate(new Date());
 		user.setUpdatedDate(new Date());
@@ -113,8 +116,14 @@ public class UserServiceImpl implements UserService {
 	public void updateRoles() {
 		Role role = new Role(1L, "ADMIN");
 		roleRepository.save(role);
-		role = new Role(2L, "USER");
-		roleRepository.save(role);
+		//role = new Role(2L, "USER");
+		//roleRepository.save(role);
+	}
+
+	@Override
+	public List<UserRole> getRoles() {
+		// TODO Auto-generated method stub
+		return userRoleRepository.findAll();
 	}
 
 } // end class UserServiceImpl

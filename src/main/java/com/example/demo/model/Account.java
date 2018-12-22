@@ -18,7 +18,7 @@ import lombok.Setter;
  * @version $Revision$, $Date$
  */
 @Entity
-@Table(name = "user")
+@Table(name = "account")
 @Data
 @Getter
 @Setter
@@ -46,8 +46,11 @@ public class Account {
 	private Long id;
 	@Column(nullable = false)
 	private String password;
+	// @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"),
+	// inverseJoinColumns = @JoinColumn(name = "role_id"))
+	// @ManyToMany
 	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-	@ManyToMany
+	@ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
 	private Set<Role> roles;
 	@Column(nullable = false, unique = true)
 	private String userName;
