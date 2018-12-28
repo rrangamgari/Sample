@@ -25,5 +25,5 @@ public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
    *
    * @return  DOCUMENT ME!
    */
-	Optional<UserRole> findById(Long id);
+	//Optional<UserRole> findById(Long id);
 }
