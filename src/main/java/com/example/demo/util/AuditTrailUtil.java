@@ -15,13 +15,18 @@ public class AuditTrailUtil {
 
 	@Autowired
 	private static UserActivityRepository auditTrail;
-	
-	public static void audit(String summary,String description,Long user) {
-		UserActivity userActivity= new UserActivity();
-		userActivity.setActivitySummary(summary);
-		userActivity.setActivityDetail(description);
-		userActivity.setCreatedBy(user);
-		userActivity.setCreatedDate(new Date());
-		auditTrail.save(userActivity);
+
+	public static void audit(String summary, String description, Long user) {
+		try {
+			UserActivity userActivity = new UserActivity();
+			userActivity.setActivitySummary(summary);
+			userActivity.setActivityDetail(description);
+			userActivity.setCreatedBy(user);
+			userActivity.setCreatedDate(new Date());
+			auditTrail.save(userActivity);
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
 	}
 }

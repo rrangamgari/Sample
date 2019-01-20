@@ -1,6 +1,7 @@
 package com.example.demo.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.CrudRepository;
 
 import com.example.demo.model.Account;
 import com.example.demo.model.UserActivity;
@@ -13,7 +14,7 @@ import com.example.demo.model.UserActivity;
  * @author   Ravi
  * @version  $Revision$, $Date$
  */
-public interface UserActivityRepository extends JpaRepository<UserActivity, Long> {
+public interface UserActivityRepository extends CrudRepository<UserActivity, Long> {
   //~ Methods ----------------------------------------------------------------------------------------------------------
 
   

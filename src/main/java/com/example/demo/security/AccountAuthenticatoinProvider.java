@@ -41,6 +41,7 @@ public class AccountAuthenticatoinProvider extends AbstractUserDetailsAuthentica
         }
 
         if (!passwordEncoder.matches((String) token.getCredentials(), userDetails.getPassword())) {
+        	System.out.println("pwd : "+userDetails.getPassword());
             throw new BadCredentialsException("Invalid credentials.");
         }
 

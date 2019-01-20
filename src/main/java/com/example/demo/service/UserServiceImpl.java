@@ -82,7 +82,11 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public Account findByUsername(String username) {
-		return userRepository.findByUserName(username);
+		Iterable<Account> accounts = userRepository.findByUserName(username);
+		for (Account account : accounts) {
+			return account;
+		}
+		return null;
 	}
 
 	// ~
@@ -98,8 +102,15 @@ public class UserServiceImpl implements UserService {
 		user.setCreatedDate(new Date());
 		user.setUpdatedDate(new Date());
 		user.setRoles(new HashSet<>(roleRepository.findAll()));
-		System.out.println("roles : "+user.getRoles());
+		System.out.println("roles : " + user.getRoles());
+		System.out.println("User : " + userId);
+		System.out.println("userId : " + user.getId());
 		userRepository.save(user);
+
+		Iterable<Account> acc = userRepository.findByUserName(user.getUserName());
+		for (Account a : acc)
+			System.out.println("userId : " + a.getId());
+
 		AuditTrailUtil.audit(AuditTrail.POST.toString(), "Save :" + user.getId(), userId);
 	}
 
@@ -122,16 +133,16 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void updateRoles() {
 		Role role = new Role(1L, "ADMIN");
-		//roleRepository.saveAndFlush(role);
+		// roleRepository.saveAndFlush(role);
 		roleRepository.save(role);
-		/*role = new Role(2L, "USER");
-		roleRepository.save(role);*/
+		role = new Role(2L, "USER");
+		roleRepository.save(role);
 		Account user = new Account();
 		user.setCredentialsExpired(false);
 		user.setUserName("Test");
 		user.setFirstName("First Name");
 		user.setLastName("last name");
-		user.setPassword(SampleUtil.encrypt("Test"));
+		user.setPassword(new BCryptPasswordEncoder().encode("Test"));
 		user.setEmailAddress("test@test.com");
 		user.setEnabled(true);
 		user.setExpired(false);
@@ -154,40 +165,43 @@ public class UserServiceImpl implements UserService {
 		ApiUsers usersResponse = new ApiUsers();
 
 		// Get Page info from usersRepository
-		Page<Account> usersPage = userRepository.findAll(spec, pageRequest);
-
-		ApiModelPageAndSort pagingResponse = new ApiModelPageAndSort();
-
-		// Set the flag to indicate next page exists
-		pagingResponse.setHasNextPage(usersPage.hasNext());
-
-		// Set the flag to indicate previous page exists
-		pagingResponse.setHasPreviousPage(usersPage.hasPrevious());
-
-		// Set the total number of records for the given Filter Specification
-		pagingResponse.setTotalNumberOfRecords(usersPage.getTotalElements());
-
-		// Set the total number of pages for the given filter specification and
-		// pagerequests
-		pagingResponse.setTotalNumberOfPages(usersPage.getTotalPages());
-
-		// Page numbers are indexed from 0 but to the consume we follow start index as 1
-		pagingResponse.setPageNumber(pageRequest.getPageNumber() + 1);
-
-		// Number of records per page
-		pagingResponse.setPageSize(pageRequest.getPageSize());
-
-		usersResponse.setPaging(pagingResponse);
-
-		// Get the Employee List from the Page
-		List<Account> users = usersPage.getContent();
-
-		// Map the data to ApiModelEmployeeResource using lambda function
-		usersResponse.setData(users.stream().map(this::getAccount).collect(Collectors.toList()));
+		/*
+		 * Page<Account> usersPage = userRepository.findAll(spec, pageRequest);
+		 * 
+		 * ApiModelPageAndSort pagingResponse = new ApiModelPageAndSort();
+		 * 
+		 * // Set the flag to indicate next page exists
+		 * pagingResponse.setHasNextPage(usersPage.hasNext());
+		 * 
+		 * // Set the flag to indicate previous page exists
+		 * pagingResponse.setHasPreviousPage(usersPage.hasPrevious());
+		 * 
+		 * // Set the total number of records for the given Filter Specification
+		 * pagingResponse.setTotalNumberOfRecords(usersPage.getTotalElements());
+		 * 
+		 * // Set the total number of pages for the given filter specification and //
+		 * pagerequests pagingResponse.setTotalNumberOfPages(usersPage.getTotalPages());
+		 * 
+		 * // Page numbers are indexed from 0 but to the consume we follow start index
+		 * as 1 pagingResponse.setPageNumber(pageRequest.getPageNumber() + 1);
+		 * 
+		 * // Number of records per page
+		 * pagingResponse.setPageSize(pageRequest.getPageSize());
+		 * 
+		 * usersResponse.setPaging(pagingResponse);
+		 * 
+		 * // Get the Employee List from the Page List<Account> users =
+		 * usersPage.getContent();
+		 * 
+		 * // Map the data to ApiModelEmployeeResource using lambda function
+		 * usersResponse.setData(users.stream().map(this::getAccount).collect(Collectors
+		 * .toList()));
+		 */
 
 		return usersResponse;
 
 	}
+
 	private ApiAccount getAccount(Account account) {
 		ApiAccount res = new ApiAccount();
 

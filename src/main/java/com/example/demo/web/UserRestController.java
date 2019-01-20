@@ -142,7 +142,7 @@ public class UserRestController {
 
 	}
 
-	@RequestMapping(value = "/users/search", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/users/search", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> searchUsers(
 			@ApiParam(value = "Query param for 'firstName' filter") @Valid @RequestParam(value = "firstName", required = false) String firstName,
 			@ApiParam(value = "Query param for 'lastName' filter") @Valid @RequestParam(value = "lastName", required = false) String lastName,
@@ -169,20 +169,18 @@ public class UserRestController {
 					// table column names.
 					.where(userFilterSpecification.getStringTypeSpecification("firstName", firstName))
 					.and(userFilterSpecification.getStringTypeSpecification("lastName", lastName))
-					.and(userFilterSpecification.getLongTypeSpecification("userName", contactPhone))
-					.and(userFilterSpecification.getDateTypeSpecification("createdDate", createdDate))
-					.and(userFilterSpecification.getDateTypeSpecification("updatedDate", updatedDate));
+					;
 
 			// This represents the Page config with sorting
 			PageRequest pageRequest = PageRequestBuilder.getPageRequest(pageSize, pageNumber, sort);
 
 			// Call the DAO with specifications and pagerequest
 			ApiUsers users = userService.getUsers(specs, pageRequest);
-
+			System.out.println(sort);
 			// Return the sorting criteria back so that the consumer can pass the same
 			// sorting or of different sorting based on the usecases.
-			users.getPaging().setSortingCriteria(sort);
-			
+			//users.getPaging().setSortingCriteria(sort);
+
 			response.setStatus("success");
 			response.setData(users);
 			return new ResponseEntity<>(response, HttpStatus.OK);
@@ -211,6 +209,7 @@ public class UserRestController {
 			response.setStatus("success");
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
+			e.printStackTrace();
 			logger.error(e.getMessage());
 			response = addErrorMessages(response, 5);
 			return new ResponseEntity<>(response, HttpStatus.ALREADY_REPORTED);

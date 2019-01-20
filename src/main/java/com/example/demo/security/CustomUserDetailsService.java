@@ -32,27 +32,33 @@ public class CustomUserDetailsService implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-		Account account = userRepository.findByUserName(username);
+		System.out.println("loadUserByUsername *****************************************************************" + username);
+		Iterable<Account> accounts = userRepository.findByUserName(username);
+		for (Account account : accounts) {
 
-		if (account == null) {
-			// Not found...
-			throw new UsernameNotFoundException("User " + username + " not found.");
+			System.out.println(account);
+			if (account == null) {
+				// Not found...
+				throw new UsernameNotFoundException("User " + username + " not found.");
+			}
+
+			if (account.getRoles() == null || account.getRoles().isEmpty()) {
+				// No Roles assigned to user...
+				throw new UsernameNotFoundException("User not authorized.");
+			}
+
+			Collection<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
+			for (Role role : account.getRoles()) {
+				grantedAuthorities.add(new SimpleGrantedAuthority(role.getName()));
+			}
+
+			User userDetails = new User(account.getUserName(), account.getPassword(), account.isEnabled(),
+					!account.isExpired(), !account.isCredentialsExpired(), !account.isLocked(), grantedAuthorities);
+
+			return userDetails;
+
 		}
-
-		if (account.getRoles() == null || account.getRoles().isEmpty()) {
-			// No Roles assigned to user...
-			throw new UsernameNotFoundException("User not authorized.");
-		}
-
-		Collection<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
-		for (Role role : account.getRoles()) {
-			grantedAuthorities.add(new SimpleGrantedAuthority(role.getName()));
-		}
-
-		User userDetails = new User(account.getUserName(), account.getPassword(), account.isEnabled(),
-				!account.isExpired(), !account.isCredentialsExpired(), !account.isLocked(), grantedAuthorities);
-
-		return userDetails;
+		return null;
 	}
 
 	private final static class UserRepositoryUserDetails extends Account implements UserDetails {
