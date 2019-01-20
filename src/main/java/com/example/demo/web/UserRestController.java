@@ -1,15 +1,21 @@
 package com.example.demo.web;
 
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
+import javax.websocket.server.PathParam;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,18 +27,24 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.api.model.ApiUsers;
+import com.example.demo.entity.UserFilterSpecification;
 import com.example.demo.model.Account;
+import com.example.demo.model.Search;
 import com.example.demo.model.UserRole;
+import com.example.demo.page.PageRequestBuilder;
 import com.example.demo.service.UserService;
 import com.example.demo.util.HttpResponseErrors;
 import com.example.demo.util.MyHttpResponse;
 import com.example.demo.util.Messages;
 import com.example.demo.util.SampleUtil;
 
+import io.swagger.annotations.ApiParam;
+
 /**
  * DOCUMENT ME!
  *
- * @author $author$
+ * @author Ravi
  * @version $Revision$, $Date$
  */
 @RequestMapping("/sample")
@@ -50,18 +62,19 @@ public class UserRestController {
 	/** DOCUMENT ME! */
 	@Autowired
 	protected AuthenticationManager authenticationManager;
-
+	@Autowired
+	protected UserFilterSpecification userFilterSpecification;
 	@Autowired
 	private UserService userService;
 
-	@RequestMapping(value = "/users/{id}", method = RequestMethod.DELETE)
-	public ResponseEntity<?> deleteUser(@PathVariable("id") Long id, HttpServletRequest request,
-			HttpSession httpSession) {
+	@RequestMapping(value = "/api/users/{id}", method = RequestMethod.DELETE)
+	public ResponseEntity<?> deleteUser(@PathVariable("id") Long id, @RequestParam("user") Long userId,
+			HttpServletRequest request, HttpSession httpSession) {
 		// model.addAttribute("userForm", new User());
 		logger.info("id : " + id);
 		MyHttpResponse response = new MyHttpResponse();
 		try {
-			userService.delete(id, (Long) httpSession.getAttribute("userId"));
+			userService.delete(id, userId);
 			response.setStatus("Success");
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -72,7 +85,7 @@ public class UserRestController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/api/users/{id}", method = RequestMethod.GET,  produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/api/users/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> getUsers(@PathVariable("id") Long id, HttpServletRequest request,
 			HttpSession httpSession) {
 		// model.addAttribute("userForm", new User());
@@ -94,14 +107,15 @@ public class UserRestController {
 	}
 
 	@RequestMapping(value = "/users/{id}", method = RequestMethod.POST)
-	public ResponseEntity<?> save(@RequestBody Account user, HttpServletRequest request, HttpSession httpSession) {
+	public ResponseEntity<?> save(@RequestBody Account user, @RequestParam("user") Long userId,
+			@PathParam("id") Long id, HttpServletRequest request, HttpSession httpSession) {
 		// logger.info(user.getPassword());
 		MyHttpResponse response = new MyHttpResponse();
 		try {
-			userService.save(user);
+			user.setId(id);
+			userService.save(user, userId);
 			response.setStatus("success");
 		} catch (NoSuchElementException e) {
-			// TODO: handle exception
 			logger.error(e.getMessage());
 			response = addErrorMessages(response, 6);
 			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -128,21 +142,51 @@ public class UserRestController {
 
 	}
 
-	@RequestMapping(value = "/users/search", method = RequestMethod.GET)
-	public ResponseEntity<?> searchUsers(@RequestParam("q") String query, @RequestParam("v") String value,
+	@RequestMapping(value = "/users/search", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> searchUsers(
+			@ApiParam(value = "Query param for 'firstName' filter") @Valid @RequestParam(value = "firstName", required = false) String firstName,
+			@ApiParam(value = "Query param for 'lastName' filter") @Valid @RequestParam(value = "lastName", required = false) String lastName,
+			@ApiParam(value = "Query param for 'midddleName' filter") @Valid @RequestParam(value = "midddleName", required = false) String midddleName,
+			@ApiParam(value = "Query param for 'userName' filter") @Valid @RequestParam(value = "userName", required = false) String userName,
+			@ApiParam(value = "Query param for 'contactPhone' filter") @Valid @RequestParam(value = "contactPhone", required = false) String contactPhone,
+			@ApiParam(value = "Query param for 'emailAddress' filter") @Valid @RequestParam(value = "emailAddress", required = false) String emailAddress,
+			@ApiParam(value = "Query param for 'createdBy' filter") @Valid @RequestParam(value = "createdBy", required = false) String createdBy,
+			@ApiParam(value = "Query param for 'createdDate' filter") @Valid @RequestParam(value = "createdDate", required = false) String createdDate,
+			@ApiParam(value = "Query param for 'updatedDate' filter") @Valid @RequestParam(value = "updatedDate", required = false) String updatedDate,
+			@ApiParam(value = "Query param for 'enabled' filter") @Valid @RequestParam(value = "enabled", required = false) String enabled,
+			@ApiParam(value = "Query param for 'locked'") @Valid @RequestParam(value = "locked", required = false) String locked,
+			@ApiParam(value = "Query param for 'pageNumber'") @Valid @RequestParam(value = "pageNumber", required = false) Integer pageNumber,
+			@ApiParam(value = "Query param for 'pageSize'") @Valid @RequestParam(value = "pageSize", required = false) Integer pageSize,
+			@ApiParam(value = "Query param for 'sort' criteria") @Valid @RequestParam(value = "sort", required = false) String sort,
 			HttpServletRequest request, HttpSession httpSession) {
-		logger.info("query : " + query);
-		logger.info("value : " + value);
+		logger.info("query : ");
+
 		Account user = null;
 		MyHttpResponse response = new MyHttpResponse();
 		try {
-			// user = userService.findById(id);
-			if (user != null)
-				user.setPassword(SampleUtil.decrypt(user.getPassword()));
+			Specification<Account> specs = Specifications
+					// Exposed attributes in API swagger spec doesn't need to be same as Database
+					// table column names.
+					.where(userFilterSpecification.getStringTypeSpecification("firstName", firstName))
+					.and(userFilterSpecification.getStringTypeSpecification("lastName", lastName))
+					.and(userFilterSpecification.getLongTypeSpecification("userName", contactPhone))
+					.and(userFilterSpecification.getDateTypeSpecification("createdDate", createdDate))
+					.and(userFilterSpecification.getDateTypeSpecification("updatedDate", updatedDate));
+
+			// This represents the Page config with sorting
+			PageRequest pageRequest = PageRequestBuilder.getPageRequest(pageSize, pageNumber, sort);
+
+			// Call the DAO with specifications and pagerequest
+			ApiUsers users = userService.getUsers(specs, pageRequest);
+
+			// Return the sorting criteria back so that the consumer can pass the same
+			// sorting or of different sorting based on the usecases.
+			users.getPaging().setSortingCriteria(sort);
+			
 			response.setStatus("success");
+			response.setData(users);
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (NoSuchElementException e) {
-			// TODO: handle exception
 			logger.error(e.getMessage());
 			response = addErrorMessages(response, 4);
 			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -157,13 +201,13 @@ public class UserRestController {
 	 * @param user
 	 *            DOCUMENT ME!
 	 */
-	@RequestMapping(value = "/registration", method = RequestMethod.POST)
-	public ResponseEntity<?> registration(@RequestBody Account user, HttpServletRequest request,
-			HttpSession httpSession) {
+	@RequestMapping(value = "/registration/{user}", method = RequestMethod.POST)
+	public ResponseEntity<?> registration(@RequestBody Account user, @PathVariable("user") Long userId,
+			HttpServletRequest request, HttpSession httpSession) {
 		logger.info("registration");
 		MyHttpResponse response = new MyHttpResponse();
 		try {
-			userService.save(user);
+			userService.save(user, userId);
 			response.setStatus("success");
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
@@ -181,7 +225,7 @@ public class UserRestController {
 		try {
 			userService.updateRoles();
 			response.setStatus("success");
-			
+
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage());

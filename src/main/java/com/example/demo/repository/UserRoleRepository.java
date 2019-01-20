@@ -12,7 +12,7 @@ import com.example.demo.model.UserRole;
 /**
  * DOCUMENT ME!
  *
- * @author   $author$
+ * @author   Ravi
  * @version  $Revision$, $Date$
  */
 public interface UserRoleRepository extends JpaRepository<UserRole, Long> {

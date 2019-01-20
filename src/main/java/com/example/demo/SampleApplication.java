@@ -28,17 +28,8 @@ public class SampleApplication {
 	InitializingBean sendDatabase() {
 		return () -> {
 			userService.updateRoles();
-			Account user = new Account();
-			user.setCredentialsExpired(false);
-			user.setUserName("Test");
-			user.setFirstName("First Name");
-			user.setLastName("last name");
-			user.setPassword("Test");
-			user.setEmailAddress("test@test.com");
-			user.setEnabled(true);
-			user.setExpired(false);
-			user.setCreatedBy("System");
-			userService.save(user);
+			
 		};
 	}
+	
 }

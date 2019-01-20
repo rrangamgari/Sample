@@ -14,7 +14,7 @@ import lombok.Setter;
 /**
  * DOCUMENT ME!
  *
- * @author $author$
+ * @author Ravi
  * @version $Revision$, $Date$
  */
 @Entity

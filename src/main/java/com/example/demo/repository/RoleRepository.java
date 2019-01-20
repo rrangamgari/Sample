@@ -10,7 +10,7 @@ import com.example.demo.model.Role;
 /**
  * DOCUMENT ME!
  *
- * @author   $author$
+ * @author   Ravi
  * @version  $Revision$, $Date$
  */
 public interface RoleRepository extends JpaRepository<Role, Long> { }

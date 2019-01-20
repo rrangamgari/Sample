@@ -9,7 +9,7 @@ import lombok.Data;
 /**
  * DOCUMENT ME!
  *
- * @author $author$
+ * @author Ravi
  * @version $Revision$, $Date$
  */
 @Entity

@@ -10,7 +10,7 @@ import com.example.demo.model.UserActivity;
 /**
  * DOCUMENT ME!
  *
- * @author   $author$
+ * @author   Ravi
  * @version  $Revision$, $Date$
  */
 public interface UserActivityRepository extends JpaRepository<UserActivity, Long> {
